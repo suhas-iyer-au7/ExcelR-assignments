@@ -2,6 +2,9 @@
 library(rvest)
 library(XML)
 library(magrittr)
+library(syuzhet)
+library(tm)
+library(wordcloud)
 
 # Amazon Reviews #############################
 aurl <- "https://www.amazon.in/product-reviews/B07XVMDRZY?ref=ods_ucc_cust_kindle_B07XVMDRZY_nrc_ucc"
@@ -40,3 +43,68 @@ class(reviews)
 s <- get_nrc_sentiment(reviews)
 barplot(colSums(s), las = 2.5, col = rainbow(10),
         ylab = 'Count',main= 'Sentiment scores for Amazon reviews')
+############################Including Word Clouds 1 amazon #######################################
+amazon <- read.delim(file.choose(), header = TRUE)
+str(amazon)
+View(amazon)
+corpus <- amazon[-1,]
+head(corpus)
+class(corpus)
+corpus <- Corpus(VectorSource(corpus))
+inspect(corpus[1:5])
+corpus <- tm_map(corpus,removePunctuation)
+corpus <- tm_map(corpus,removeNumbers)
+corpus_clean<-tm_map(corpus,stripWhitespace)
+cleanset<-tm_map(corpus,removeWords, stopwords('english'))
+removeURL <- function(x) gsub('http[[:alnum:]]*','',x)
+cleanset <- tm_map(cleanset, content_transformer(removeURL))
+cleanset<-tm_map(cleanset,removeWords, c('can','phone'))
+
+cleanset<-tm_map(cleanset,removeWords, c('phones'))
+cleanset <- tm_map(cleanset,stripWhitespace)
+tdm <- TermDocumentMatrix(cleanset)
+tdm
+tdm <- as.matrix(tdm)
+library(wordcloud)
+
+w <- sort(rowSums(tdm), decreasing = TRUE) # Sort words in decreasing order.
+set.seed(123)
+wordcloud(words = names(w), freq = w, 
+          max.words = 250,random.order = F,
+          min.freq =  3, 
+          colors = brewer.pal(8, 'Dark2'),
+          scale = c(5,0.3),
+          rot.per = 0.6)
+############################Including Word Clouds 1 snapdeal #######################################
+snap<- read.delim(file.choose(), header = TRUE)
+str(snap)
+View(snap)
+corpus <- snap[-1,]
+head(corpus)
+class(corpus)
+corpus <- Corpus(VectorSource(corpus))
+inspect(corpus[1:5])
+corpus <- tm_map(corpus,removePunctuation)
+corpus <- tm_map(corpus,removeNumbers)
+corpus_clean<-tm_map(corpus,stripWhitespace)
+cleanset<-tm_map(corpus,removeWords, stopwords('english'))
+removeURL <- function(x) gsub('http[[:alnum:]]*','',x)
+cleanset <- tm_map(cleanset, content_transformer(removeURL))
+cleanset<-tm_map(cleanset,removeWords, c('can','phone'))
+
+cleanset<-tm_map(cleanset,removeWords, c('phones'))
+cleanset <- tm_map(cleanset,stripWhitespace)
+tdm <- TermDocumentMatrix(cleanset)
+tdm
+tdm <- as.matrix(tdm)
+library(wordcloud)
+
+w <- sort(rowSums(tdm), decreasing = TRUE) # Sort words in decreasing order.
+set.seed(123)
+wordcloud(words = names(w), freq = w, 
+          max.words = 250,random.order = F,
+          min.freq =  3, 
+          colors = brewer.pal(8, 'Dark2'),
+          scale = c(5,0.3),
+          rot.per = 0.6)
+
